@@ -27,6 +27,8 @@ public class PackageUtil {
 
         try {
             // get current path resources
+            // TODO still has some issue: getResources can't find the jar file, because the static resource path will change.
+            // If you need search file in jar, please do more work based on this function.
             dirs = Thread.currentThread().getContextClassLoader().getResources(packageDirPath);
 
             while (dirs.hasMoreElements()) {
@@ -87,6 +89,24 @@ public class PackageUtil {
     }
 
     private static void findClassesInPackageByJar(String packageName, String packageDirPath, Enumeration<JarEntry> jarEntries, boolean recursive, Set<Class<?>> classes) {
+        while (jarEntries.hasMoreElements()) {
+            JarEntry jarEntry = jarEntries.nextElement();
 
+            String classFileSuffix = ".class";
+
+            if (jarEntry.isDirectory() || !jarEntry.getName().endsWith(classFileSuffix)) {
+                continue;
+            }
+
+            String classNameWithPackageName = jarEntry.getName()
+                    .substring(0, jarEntry.getName().length() - classFileSuffix.length()).replace('/', '.');
+            try {
+                Class<?> loadClass = Thread.currentThread().getContextClassLoader().loadClass(classNameWithPackageName);
+                classes.add(loadClass);
+            } catch (ClassNotFoundException e) {
+                logger.warning("Not found class in jar: " + classNameWithPackageName);
+                e.printStackTrace();
+            }
+        }
     }
 }

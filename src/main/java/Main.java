@@ -1,8 +1,11 @@
 import mini.spring.ioc.util.PackageUtil;
 
+import java.util.Set;
+
 public class Main {
     public static void main(String[] args) {
-        PackageUtil.getClasses("mini.spring.ioc.util");
-        System.out.println(1 + 1);
+        Set<Class<?>> classes = PackageUtil.getClasses("resources/main/na.jar");
+        System.out.println(classes);
+
     }
 }
