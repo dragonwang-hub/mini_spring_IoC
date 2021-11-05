@@ -2,6 +2,7 @@ package mini.spring.ioc.util;
 
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -56,6 +57,33 @@ public class PackageUtil {
 
     private static void findClassesInPackageByFile(String packageName, String filePath, boolean recursive, Set<Class<?>> classes) {
         File dir = new File(filePath);
+
+        if (!dir.exists() || !dir.isDirectory()) {
+            logger.warning("The filepath doesn't exist file or not a directory.");
+            return;
+        }
+
+        String classFileSuffix = ".class";
+        File[] listFiles = dir.listFiles(pathname -> {
+            // remain directory && class file (use suffix to judge file type)
+            return (pathname.isDirectory() && recursive) || (pathname.getName().endsWith(classFileSuffix));
+        });
+
+        for (File file : listFiles) {
+            if (file.isDirectory()) {
+                // recursive call
+                findClassesInPackageByFile(packageName + "." + file.getName(), file.getAbsolutePath(), recursive, classes);
+            } else {
+                String className = file.getName().substring(0, file.getName().length() - classFileSuffix.length());
+                try {
+                    Class<?> loadClass = Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className);
+                    classes.add(loadClass);
+                } catch (ClassNotFoundException e) {
+                    logger.warning("Not found class: " + className);
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     private static void findClassesInPackageByJar(String packageName, String packageDirPath, Enumeration<JarEntry> jarEntries, boolean recursive, Set<Class<?>> classes) {
