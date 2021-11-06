@@ -134,10 +134,21 @@ public class MiniAnnotationConfigApplicationContext {
 
 
     private void autowiredBeanForObject(Set<BeanDefinition> beanDefinitions) {
+        beanDefinitions.forEach(beanDefinition -> {
+            Class beanClass = beanDefinition.getBeanClass();
+            Object object = getBean(beanDefinition.getBeanName());
+            // get fields
+            Field[] declaredFields = beanClass.getDeclaredFields();
+            for (Field declaredField : declaredFields) {
+                // handle @Value
+                handleAutowiredAnnotation(beanClass, object, declaredField);
+            }
+            miniIoC.put(beanDefinition.getBeanName(), object);
+        });
     }
 
 
-    private void handleAutowiredAnnotation(Class beanClass, Object beanInstance, Field declaredField) {
+    private void handleAutowiredAnnotation(Class beanClass, Object object, Field declaredField) {
         Autowired autowired = declaredField.getAnnotation(Autowired.class);
 
         if (autowired != null) {
@@ -146,18 +157,21 @@ public class MiniAnnotationConfigApplicationContext {
                 // handle @Qualifier
 
             } else {
-                String declaredFieldTypeName = declaredField.getType().getSimpleName();
+                // get bean according to type name
+                String declaredFieldBeanName = StringUtils.uncapitalize(declaredField.getType().getSimpleName());
+                Object autowiredBean = getBean(declaredFieldBeanName);
 
-                System.out.println(declaredFieldTypeName);
+                // set autowired bean to object according to field name
+                try {
+                    String methodName = "set" + StringUtils.capitalize(declaredField.getName());
+                    Method setBeanMethod = beanClass.getMethod(methodName, declaredField.getType());
+                    setBeanMethod.invoke(object, autowiredBean);
 
-                String declaredFieldBeanName = StringUtils.uncapitalize(declaredFieldTypeName);
-                System.out.println(declaredFieldBeanName);
-                Object bean = getBean(declaredFieldBeanName);
-                System.out.println(bean);
-
-
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    logger.warning("Set bean method warning: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
-
         }
     }
 
