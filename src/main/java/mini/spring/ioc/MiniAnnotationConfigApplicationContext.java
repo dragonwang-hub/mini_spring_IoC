@@ -19,11 +19,11 @@ public class MiniAnnotationConfigApplicationContext {
 
     public MiniAnnotationConfigApplicationContext(String packageName) {
         // get all target classes on the package
-        logger.info("Get all classes with annotation on specified package.");
+        logger.info("Get all classes with annotation on specified package...");
         Set<Class<?>> classesWithAnnotation = getAnnotationClassesByFilter(packageName);
 
         // create bean set according to beanDefinition
-        logger.info("Get all classes with annotation on specified package.");
+        logger.info("Create beanDefinitions based on classes with annotation...");
         Set<BeanDefinition> beanDefinitions = createBeanDefinitions(classesWithAnnotation);
 
         // autowire bean to miniIoC
