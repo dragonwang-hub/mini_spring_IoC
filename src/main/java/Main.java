@@ -1,11 +1,10 @@
-import mini.spring.ioc.util.PackageUtil;
-
-import java.util.Set;
+import mini.spring.ioc.MiniAnnotationConfigApplicationContext;
 
 public class Main {
     public static void main(String[] args) {
-        Set<Class<?>> classes = PackageUtil.getClasses("mini.spring.ioc");
-        System.out.println(classes);
-
+        String packageName = "mini.project";
+        MiniAnnotationConfigApplicationContext miniAnnotationConfigApplicationContext
+                = new MiniAnnotationConfigApplicationContext(packageName);
+//        System.out.println(classes);
     }
 }

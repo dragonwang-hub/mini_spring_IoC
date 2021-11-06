@@ -2,6 +2,6 @@ package mini.project;
 
 import mini.spring.ioc.annotation.Component;
 
-@Component
+@Component("main")
 public class MiniApplication {
 }
