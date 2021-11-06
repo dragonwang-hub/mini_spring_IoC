@@ -1,6 +1,7 @@
 package mini.project.dto;
 
 import lombok.Data;
+import mini.spring.ioc.annotation.Autowired;
 import mini.spring.ioc.annotation.Component;
 import mini.spring.ioc.annotation.Value;
 
@@ -11,4 +12,6 @@ public class TaxDriver {
     private Integer id;
     @Value("Joey")
     private String name;
+    @Autowired
+    private Tax tax;
 }
