@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 /**
  * @author Dragon
  */
+// TODO still have 'circular dependency' injection problem
 public class MiniAnnotationConfigApplicationContext {
 
     private static final Logger logger = Logger.getLogger(MiniAnnotationConfigApplicationContext.class.getName());
@@ -47,10 +48,12 @@ public class MiniAnnotationConfigApplicationContext {
 
         // set object to IoC
         // 1. handle @Value to create object, set to IoC
+        logger.info("Create bean and set to mini IoC...");
         createObjectBasedOnBeanDefinition(beanDefinitions);
         // 2. handle @autowired to autowire bean for object. get bean from IoC, and overwrite object
+        logger.info("Autowired bean for each object with @Autowired...");
         autowiredBeanForObject(beanDefinitions);
-
+        logger.info("Mini IoC initialized!");
     }
 
 
