@@ -31,10 +31,10 @@ public class MiniAnnotationConfigApplicationContext {
         return miniIoC.keySet();
     }
 
-    // TODO delete later
-    public Map<String, Object> getMiniIoC() {
-        return miniIoC;
+    public Object getBean(String declaredFieldBeanName) {
+        return miniIoC.get(declaredFieldBeanName);
     }
+
 
     public MiniAnnotationConfigApplicationContext(String packageName) {
         // get all target classes on the package
@@ -52,6 +52,7 @@ public class MiniAnnotationConfigApplicationContext {
         autowiredBeanForObject(beanDefinitions);
 
     }
+
 
     private Set<Class<?>> getAnnotationClassesByFilter(String packageName) {
         Set<Class<?>> classes = PackageUtil.getClasses(packageName);
@@ -188,10 +189,6 @@ public class MiniAnnotationConfigApplicationContext {
                 }
             }
         }
-    }
-
-    public Object getBean(String declaredFieldBeanName) {
-        return miniIoC.get(declaredFieldBeanName);
     }
 
 }
