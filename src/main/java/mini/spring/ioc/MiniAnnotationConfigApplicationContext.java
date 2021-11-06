@@ -5,7 +5,9 @@ import mini.spring.ioc.annotation.Component;
 import mini.spring.ioc.util.PackageUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -17,6 +19,16 @@ public class MiniAnnotationConfigApplicationContext {
 
     private static final Logger logger = Logger.getLogger(MiniAnnotationConfigApplicationContext.class.getName());
 
+    private Map<String, Object> miniIoC = new HashMap<>();
+
+    public Set<String> getBeanNames() {
+        return miniIoC.keySet();
+    }
+    // TODO delete later
+    public Map<String, Object> getMiniIoC() {
+        return miniIoC;
+    }
+
     public MiniAnnotationConfigApplicationContext(String packageName) {
         // get all target classes on the package
         logger.info("Get all classes with annotation on specified package...");
@@ -26,7 +38,11 @@ public class MiniAnnotationConfigApplicationContext {
         logger.info("Create beanDefinitions based on classes with annotation...");
         Set<BeanDefinition> beanDefinitions = createBeanDefinitions(classesWithAnnotation);
 
-        // autowire bean to miniIoC
+        // set object to IoC
+        // 1.
+        createObjectBasedOnBeanDefinition(beanDefinitions);
+
+        // autowire bean for object
 
     }
 
@@ -59,4 +75,18 @@ public class MiniAnnotationConfigApplicationContext {
 
         return beanDefinitions;
     }
+
+    private void createObjectBasedOnBeanDefinition(Set<BeanDefinition> beanDefinitions) {
+        beanDefinitions.forEach(beanDefinition -> {
+            Class beanClass = beanDefinition.getBeanClass();
+            try {
+                Object beanInstance = beanClass.newInstance();
+                miniIoC.put(beanDefinition.getBeanName(), beanInstance);
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+
+        });
+    }
+
 }

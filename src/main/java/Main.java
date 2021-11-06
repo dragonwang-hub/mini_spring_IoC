@@ -5,6 +5,7 @@ public class Main {
         String packageName = "mini.project";
         MiniAnnotationConfigApplicationContext miniAnnotationConfigApplicationContext
                 = new MiniAnnotationConfigApplicationContext(packageName);
-//        System.out.println(classes);
+
+        System.out.println(miniAnnotationConfigApplicationContext.getMiniIoC().toString());
     }
 }
