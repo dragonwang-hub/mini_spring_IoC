@@ -69,8 +69,7 @@ public class MiniAnnotationConfigApplicationContext {
 
         classesWithAnnotation.forEach(clazz -> {
             //beanName
-            String annotationValue = clazz.getAnnotation(Component.class).value();
-            String beanName = annotationValue;
+            String beanName = clazz.getAnnotation(Component.class).value();
             if ("".equals(beanName)) {
                 // update it to class name
                 beanName = StringUtils.uncapitalize(clazz.getSimpleName());
@@ -155,6 +154,22 @@ public class MiniAnnotationConfigApplicationContext {
             Qualifier qualifier = declaredField.getAnnotation(Qualifier.class);
             if (qualifier != null) {
                 // handle @Qualifier
+
+                // get bean according to Qualifier value
+                Object qualifierBean = getBean(qualifier.value());
+                String methodName = "set" + StringUtils.capitalize(declaredField.getName());
+                try {
+                    //set bean
+                    Method setBeanMethod = beanClass.getMethod(methodName, declaredField.getType());
+                    setBeanMethod.invoke(object, qualifierBean);
+
+                } catch (NoSuchMethodException e) {
+                    logger.warning("No such method: " + methodName + " for " + object.toString());
+                    e.printStackTrace();
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+
 
             } else {
                 // get bean according to type name
