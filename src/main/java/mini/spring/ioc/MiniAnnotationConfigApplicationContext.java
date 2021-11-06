@@ -2,9 +2,13 @@ package mini.spring.ioc;
 
 
 import mini.spring.ioc.annotation.Component;
+import mini.spring.ioc.annotation.Value;
 import mini.spring.ioc.util.PackageUtil;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -24,6 +28,7 @@ public class MiniAnnotationConfigApplicationContext {
     public Set<String> getBeanNames() {
         return miniIoC.keySet();
     }
+
     // TODO delete later
     public Map<String, Object> getMiniIoC() {
         return miniIoC;
@@ -81,6 +86,39 @@ public class MiniAnnotationConfigApplicationContext {
             Class beanClass = beanDefinition.getBeanClass();
             try {
                 Object beanInstance = beanClass.newInstance();
+
+                // get fields
+                Field[] declaredFields = beanClass.getDeclaredFields();
+                for (Field declaredField : declaredFields) {
+                    Value declaredFieldAnnotation = declaredField.getAnnotation(Value.class);
+                    if (declaredFieldAnnotation != null) {
+                        String value = declaredFieldAnnotation.value();
+
+                        // use set method to set value
+                        String setMethodName = "set" + StringUtils.capitalize(declaredField.getName());
+                        try {
+                            Method setMethod = beanClass.getMethod(setMethodName, declaredField.getType());
+
+                            // convert value type based on property type, because @Value return is String
+                            Object declaredValue = null;
+                            switch (declaredField.getType().getName()) {
+                                case "java.lang.String":
+                                    declaredValue = value;
+                                    break;
+                                case "java.lang.Integer":
+                                    declaredValue = Integer.parseInt(value);
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            setMethod.invoke(beanInstance, declaredValue);
+                        } catch (NoSuchMethodException | InvocationTargetException e) {
+                            logger.warning("Get method issue: " + e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                }
                 miniIoC.put(beanDefinition.getBeanName(), beanInstance);
             } catch (InstantiationException | IllegalAccessException e) {
                 e.printStackTrace();
